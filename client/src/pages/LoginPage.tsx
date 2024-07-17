@@ -1,14 +1,17 @@
-import React from 'react';
-import LoginForm from '../components/LoginForm';
-import { login } from '../services/AuthService';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-
+import React, { useState } from 'react';
+import { login } from '../services/AuthService';
 
 const LoginPage: React.FC = () => {
-  const handleLogin = async (formData: { email: string; password: string }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
     try {
-      const response = await login(formData.email, formData.password);
+      const response = await login(email, password);
       console.log('Login successful:', response);
       // Handle successful login (e.g., redirect to dashboard)
     } catch (error) {
@@ -30,7 +33,30 @@ const LoginPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Login
       </Typography>
-      <LoginForm onLogin={handleLogin} />
+      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+        <TextField
+          label="Email Address"
+          type="email"
+          fullWidth
+          margin="normal"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <TextField
+          label="Password"
+          type="password"
+          fullWidth
+          margin="normal"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        <Button type="submit" variant="contained" color="primary">
+          Login
+        </Button>
+      </form>
     </Box>
   );
 };
