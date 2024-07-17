@@ -1,15 +1,13 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
+import React from 'react';
+import FormField from '../components/FormField';
+import useLoginForm from '../hooks/useLoginForm';
 import { login } from '../services/AuthService';
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = async () => {
+  const { email, password, handleChange, handleSubmit } = useLoginForm(async (email, password) => {
     try {
       const response = await login(email, password);
       console.log('Login successful:', response);
@@ -18,7 +16,7 @@ const LoginPage: React.FC = () => {
       console.error('Login failed:', error);
       // Handle login error
     }
-  };
+  });
 
   return (
     <Box
@@ -33,26 +31,21 @@ const LoginPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Login
       </Typography>
-      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
-        <TextField
+      <form onSubmit={handleSubmit}>
+        <FormField
           label="Email Address"
           type="email"
-          fullWidth
-          margin="normal"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          onChange={handleChange}
+          name="email"
         />
-        <TextField
+        <FormField
           label="Password"
           type="password"
-          fullWidth
-          margin="normal"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          onChange={handleChange}
+          name="password"
         />
-
         <Button type="submit" variant="contained" color="primary">
           Login
         </Button>
