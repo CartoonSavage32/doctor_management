@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 import boto3
 from app.db import doctor_crud, pdf_crud
@@ -24,7 +25,18 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     return verify_access_token(token, credentials_exception)
 
 
-@router.post("/upload", response_model=PDFResponse)
+@router.get("/get-pdfs", response_model=List[PDFResponse])
+def get_all_pdfs(token: str = Depends(oauth2_scheme)):
+    user_email = get_current_user(token)
+    doctor = doctor_crud.get_doctor_by_email(user_email)
+    if not doctor:
+        raise HTTPException(status_code=400, detail="Invalid user")
+
+    pdfs = pdf_crud.get_pdfs_by_doctor_id(doctor["DoctorID"])
+    return pdfs
+
+
+@router.post("/upload-pdf", response_model=PDFResponse)
 def upload_pdf(file: UploadFile = File(...), token: str = Depends(oauth2_scheme)):
     user_email = get_current_user(token)
     doctor = doctor_crud.get_doctor_by_email(user_email)
@@ -32,7 +44,7 @@ def upload_pdf(file: UploadFile = File(...), token: str = Depends(oauth2_scheme)
         raise HTTPException(status_code=400, detail="Invalid user")
 
     file_location = (
-        f"pdfs/{doctor['DoctorID']}/{datetime.utcnow().timestamp()}_{file.filename}"
+        f"pdfs/{doctor['DoctorID']}/{datetime.now().timestamp()}_{file.filename}"
     )
     try:
         s3.upload_fileobj(file.file, BUCKET_NAME, file_location)

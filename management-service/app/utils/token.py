@@ -3,7 +3,7 @@ from typing import Optional
 
 from jose import JWTError, jwt
 
-SECRET_KEY = "your-secret-key"
+SECRET_KEY = "tCR7jIKQmw4vcbBU80GITKPI0RdMC5iT"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

@@ -1,13 +1,10 @@
-import logging
 from datetime import timedelta
+from typing import Dict, Union
 
 from app.db import doctor_crud
-from app.schemas.doctor import DoctorCreate, DoctorResponse, DoctorLogin
+from app.schemas.doctor import DoctorCreate, DoctorLogin, DoctorResponse
 from app.utils.token import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from fastapi import APIRouter, HTTPException, status
-
-
-logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -21,13 +18,9 @@ def signup(doctor: DoctorCreate):
     return new_doctor
 
 
-@router.post("/login")
+@router.post("/login", response_model=Dict[str, Union[str, DoctorResponse]])
 def login(login: DoctorLogin):
-    logger.info(
-        f"Received login request with username: {login.email} with password: {login.password}"
-    )
     doctor = doctor_crud.authenticate_user(login.email, login.password)
-    logger.info(f"Authentication result: {doctor}")
     if not doctor:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
@@ -36,4 +29,14 @@ def login(login: DoctorLogin):
     access_token = create_access_token(
         data={"sub": doctor["Email"]}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    doctor_response = DoctorResponse(
+        DoctorID=doctor["DoctorID"],
+        Name=doctor["Name"],
+        Email=doctor["Email"],
+        Specialty=doctor["Specialty"],
+    )
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "doctor": doctor_response,
+    }

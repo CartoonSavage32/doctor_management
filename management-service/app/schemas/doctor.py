@@ -1,8 +1,7 @@
 from pydantic import BaseModel, EmailStr
 
 class DoctorCreate(BaseModel):
-    fname: str
-    lname: str
+    name: str
     email: EmailStr
     password: str
     specialty: str
